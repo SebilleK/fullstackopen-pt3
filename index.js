@@ -25,7 +25,9 @@ let persons = [
 	},
 ];
 
+//! Middlewares
 app.use(express.json());
+app.use(express.static('dist'));
 app.use(morgan('tiny'));
 //? Added for exercise 3.8 (extra Log line)
 // custom token

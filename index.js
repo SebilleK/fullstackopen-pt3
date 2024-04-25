@@ -1,4 +1,5 @@
 const express = require('express');
+const morgan = require('morgan');
 const app = express();
 
 let persons = [
@@ -25,6 +26,22 @@ let persons = [
 ];
 
 app.use(express.json());
+app.use(morgan('tiny'));
+//? Added for exercise 3.8 (extra Log line)
+// custom token
+morgan.token('response', (req, res) => JSON.stringify(res.locals.data));
+// log similar to tiny but adding the custom token above
+app.use(morgan(`:method :url :status :res[content-length] - :response-time ms :response`));
+
+//! ______________________________________
+// Default "tiny" token format/definition response:
+/* 
+	morgan(':method :url :status :res[content-length] - :response-time ms')
+Example:
+	GET /api/persons/3 200 53 - 3.998 ms
+*/
+// for custom token formats to be used and overwriting existing token definitions see docs (exercise 3.8)
+//!______________________________________
 
 app.get('/api/persons', (request, response) => {
 	response.send(persons);
@@ -52,6 +69,9 @@ app.post('/api/persons', (request, response) => {
 	};
 
 	persons = persons.concat(person);
+
+	//? for logging (see above, and see exercise 3.8)
+	response.locals.data = person;
 
 	response.json(person);
 });

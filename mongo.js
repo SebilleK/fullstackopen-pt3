@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+require('dotenv').config();
 
 if (process.argv.length > 5 || process.argv.length < 3) {
 	console.log(
@@ -8,11 +9,11 @@ if (process.argv.length > 5 || process.argv.length < 3) {
 } else {
 	//? password needs to be encoded if it contains special characters
 	// console.log('argument 2:', process.argv[2], 'argument 3:', process.argv[3], 'argument 4:', process.argv[4]);
-	const password = encodeURI(process.argv[2]);
+	// const password = encodeURI(process.argv[2]);
 	const name = process.argv[3];
 	const number = process.argv[4];
 
-	const url = `mongodb+srv://margaridagrilo7:${password}@fullstackopen.vm4muhd.mongodb.net/`;
+	const url = process.env.MONGODB_URI;
 
 	mongoose.set('strictQuery', false);
 

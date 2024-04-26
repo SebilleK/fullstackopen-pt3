@@ -2,6 +2,8 @@ const express = require('express');
 const morgan = require('morgan');
 const cors = require('cors');
 const app = express();
+require('dotenv').config();
+const Entry = require('./models/entry');
 
 let persons = [
 	{
@@ -37,6 +39,11 @@ morgan.token('response', (req, res) => JSON.stringify(res.locals.data));
 // log similar to tiny but adding the custom token above
 app.use(morgan(`:method :url :status :res[content-length] - :response-time ms :response`));
 
+//! MongoDB | Mongoose
+//? provide password to connect to database when running script: npm start <password>
+//! check .env hardcoded url. security issue??
+//? all code of this part is in models/entry.js
+
 //! ______________________________________
 // Default "tiny" token format/definition response:
 /* 
@@ -48,7 +55,9 @@ Example:
 //!______________________________________
 
 app.get('/api/persons', (request, response) => {
-	response.send(persons);
+	Entry.find({}).then(entries => {
+		response.json(entries);
+	});
 });
 
 app.post('/api/persons', (request, response) => {
@@ -66,30 +75,28 @@ app.post('/api/persons', (request, response) => {
 		});
 	}
 
-	const person = {
-		id: Math.random() * 1000,
+	const person = new Entry({
 		name: body.name,
 		number: body.number,
-	};
-
-	persons = persons.concat(person);
+	});
 
 	//? for logging (see above, and see exercise 3.8)
 	response.locals.data = person;
 
-	response.json(person);
+	person.save().then(savedPerson => {
+		response.json(savedPerson);
+	});
 });
 
 app.get('/api/persons/:id', (request, response) => {
-	const id = Number(request.params.id);
-	const person = persons.find(person => person.id === id);
-
-	if (person) {
-		console.log('Matched to person: ', person);
-		response.json(person);
-	} else {
-		console.log('No matching person found for the provided id!!');
-		response.status(404).end();
+	try {
+		Entry.findById(request.params.id).then(person => {
+			console.log('Matched to person: ', person);
+			response.json(person);
+		});
+	} catch (error) {
+		response.status(400).end();
+		console.log(error);
 	}
 });
 
@@ -108,7 +115,7 @@ app.get('/info', (request, response) => {
 	response.send(info);
 });
 
-const PORT = 3001;
+const PORT = process.env.PORT;
 app.listen(PORT, () => {
 	console.log(`Server running on port ${PORT}`);
 });

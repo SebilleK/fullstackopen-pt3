@@ -39,6 +39,19 @@ morgan.token('response', (req, res) => JSON.stringify(res.locals.data));
 // log similar to tiny but adding the custom token above
 app.use(morgan(`:method :url :status :res[content-length] - :response-time ms :response`));
 
+//! Error handlers
+const errorHandler = (error, request, response, next) => {
+	console.log(error.message);
+
+	if (error.name === 'CastError') {
+		return response.status(400).send({ error: 'malformatted id' });
+	}
+
+	next(error);
+};
+
+app.use(errorHandler);
+
 //! MongoDB | Mongoose
 //? provide password to connect to database when running script: npm start <password>
 //! check .env hardcoded url. security issue??
@@ -54,12 +67,15 @@ Example:
 // for custom token formats to be used and overwriting existing token definitions see docs (exercise 3.8)
 //!______________________________________
 
+//! Routes
+//? Get all Entries
 app.get('/api/persons', (request, response) => {
 	Entry.find({}).then(entries => {
 		response.json(entries);
 	});
 });
 
+//? Create Entry (and update it if it already exists)
 app.post('/api/persons', (request, response) => {
 	const body = request.body;
 
@@ -69,50 +85,56 @@ app.post('/api/persons', (request, response) => {
 		});
 	}
 
-	if (persons.find(person => person.name === body.name)) {
-		return response.status(400).json({
-			error: 'name must be unique',
-		});
-	}
+	Entry.findOne({ name: body.name }).then(person => {
+		if (person) {
+			Entry.findOneAndUpdate({ name: body.name }, { number: body.number }, { new: true, runValidators: true, context: 'query' })
+				.then(updatedPerson => {
+					response.json(updatedPerson);
+				})
+				.catch(error => next(error));
+		} else {
+			const person = new Entry({
+				name: body.name,
+				number: body.number,
+			});
 
-	const person = new Entry({
-		name: body.name,
-		number: body.number,
+			person.save().then(savedPerson => {
+				response.json(savedPerson);
+			});
+		}
+
+		//? for logging (see above, and see exercise 3.8)
+		response.locals.data = person;
 	});
-
-	//? for logging (see above, and see exercise 3.8)
-	response.locals.data = person;
-
-	person.save().then(savedPerson => {
-		response.json(savedPerson);
-	});
 });
 
-app.get('/api/persons/:id', (request, response) => {
-	try {
-		Entry.findById(request.params.id).then(person => {
-			console.log('Matched to person: ', person);
-			response.json(person);
-		});
-	} catch (error) {
-		response.status(400).end();
-		console.log(error);
-	}
+//? Get one Entry by id
+app.get('/api/persons/:id', (request, response, next) => {
+	Entry.findById(request.params.id)
+		.then(person => {
+			if (person) {
+				response.json(person);
+			} else {
+				response.status(404).end();
+			}
+		})
+		.catch(error => next(error));
 });
 
-app.delete('/api/persons/:id', (request, response) => {
-	const id = Number(request.params.id);
-	persons = persons.filter(person => person.id !== id);
-
-	response.status(204).end();
+//? Delete Entry by id
+app.delete('/api/persons/:id', (request, response, next) => {
+	Entry.findByIdAndDelete(request.params.id)
+		.then(result => {
+			response.status(204).end();
+		})
+		.catch(error => next(error));
 });
 
+//? Info
 app.get('/info', (request, response) => {
-	let info = {
-		description: `Phonebook has info for ${persons.length} people`,
-		date: new Date(), // new Date(),
-	};
-	response.send(info);
+	Entry.countDocuments({}).then(count => {
+		response.send(`Phonebook has info for ${count} people. This page was generated @ ${new Date()}`);
+	});
 });
 
 const PORT = process.env.PORT;

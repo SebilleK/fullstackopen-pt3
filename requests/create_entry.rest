@@ -2,7 +2,7 @@ POST http://localhost:3001/api/persons
 Content-Type: application/json
 
 {
-    "name": "Lysithea von Ordelia",
+    "name": "Ferdinand von Aegir",
     "number": "98-27456-20"
 }
 

@@ -6,7 +6,7 @@ Live: https://phonebook-fso-exercise-m7w9.onrender.com
 
 ### Notes
 
-- Frontend in React and Backend in Node + Express
+- Frontend in React and Backend in Node + Express + MongoDB
 
 - To run the script with MongoDB:
 

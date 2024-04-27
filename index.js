@@ -45,12 +45,15 @@ const errorHandler = (error, request, response, next) => {
 
 	if (error.name === 'CastError') {
 		return response.status(400).send({ error: 'malformatted id' });
+	} else if (error.name === 'ValidationError') {
+		return response.status(400).json({ error: error.message });
 	}
 
 	next(error);
 };
 
 app.use(errorHandler);
+console.log('Error handler working.');
 
 //! MongoDB | Mongoose
 //? provide password to connect to database when running script: npm start <password>
@@ -75,8 +78,8 @@ app.get('/api/persons', (request, response) => {
 	});
 });
 
-//? Create Entry (and update it if it already exists)
-app.post('/api/persons', (request, response) => {
+//? Create Entry
+app.post('/api/persons', (request, response, next) => {
 	const body = request.body;
 
 	if (!body.name || !body.number) {
@@ -85,35 +88,52 @@ app.post('/api/persons', (request, response) => {
 		});
 	}
 
-	Entry.findOne({ name: body.name }).then(person => {
-		if (person) {
-			Entry.findOneAndUpdate({ name: body.name }, { number: body.number }, { new: true, runValidators: true, context: 'query' })
-				.then(updatedPerson => {
-					response.json(updatedPerson);
-				})
-				.catch(error => next(error));
-		} else {
-			const person = new Entry({
-				name: body.name,
-				number: body.number,
-			});
-
-			person.save().then(savedPerson => {
-				response.json(savedPerson);
-			});
-		}
-
-		//? for logging (see above, and see exercise 3.8)
-		response.locals.data = person;
+	const newEntry = new Entry({
+		name: body.name,
+		number: body.number,
 	});
+
+	newEntry
+		.save()
+		.then(newEntry => {
+			response.json(newEntry);
+		})
+		.catch(error => next(error));
+
+	//? for logging (see above, and see exercise 3.8)
+	response.locals.data = newEntry;
+});
+
+//? Update Entry
+app.put('/api/persons/:id', (request, response, next) => {
+	const { id } = request.params;
+	const body = request.body;
+
+	const updatedEntry = {
+		name: body.name,
+		number: body.number,
+		id: id,
+	};
+
+	Entry.findByIdAndUpdate(id, updatedEntry, { new: true, runValidators: true, context: 'query' })
+		.then(updatedEntry => {
+			if (updatedEntry) {
+				response.json(updatedEntry);
+			} else {
+				response.status(404).end();
+			}
+		})
+		.catch(error => next(error));
+
+	response.locals.data = updatedEntry;
 });
 
 //? Get one Entry by id
 app.get('/api/persons/:id', (request, response, next) => {
 	Entry.findById(request.params.id)
-		.then(person => {
-			if (person) {
-				response.json(person);
+		.then(Entry => {
+			if (Entry) {
+				response.json(Entry);
 			} else {
 				response.status(404).end();
 			}

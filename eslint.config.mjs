@@ -5,10 +5,16 @@ export default [
 	{ files: ['**/*.js', '!**/dist/**', '!**/config/**'], rules: { 'no-console': 'off' } },
 
 	// add the eqeqeq indent, linebreak-style, semi and quotes rules
-	{ files: ['**/*.js'], rules: { indent: ['error', 2] } },
-	{ files: ['**/*.js'], rules: { 'linebreak-style': ['error', 'unix'] } },
-	{ files: ['**/*.js'], rules: { quotes: ['error', 'single'] } },
-	{ files: ['**/*.js'], rules: { semi: ['error', 'never'] } },
+	{
+		files: ['**/*.js'],
+		rules: {
+			eqeqeq: ['error', 'always'],
+			indent: ['error', 'tab'],
+			'linebreak-style': ['error', 'unix'],
+			quotes: ['error', 'single'],
+			semi: ['error', 'always'],
+		},
+	},
 	{ languageOptions: { globals: globals.browser } },
 	// ignore the dist folder
 ];

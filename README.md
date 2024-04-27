@@ -6,7 +6,7 @@ Live: https://phonebook-fso-exercise-m7w9.onrender.com
 
 ### Preview
 
-![Test](https://github.com/SebilleK/fullstackopen-pt3/blob/master/preview/test.gif.gif) ![Console](https://github.com/SebilleK/fullstackopen-pt3/blob/master/preview/console.gif.gif)
+![Test](https://github.com/SebilleK/fullstackopen-pt3/blob/master/preview/test.gif.gif)![Console](https://github.com/SebilleK/fullstackopen-pt3/blob/master/preview/console.gif.gif)
 
 ### Notes
 

@@ -37,7 +37,7 @@ app.use(morgan('tiny'));
 // custom token
 morgan.token('response', (req, res) => JSON.stringify(res.locals.data));
 // log similar to tiny but adding the custom token above
-app.use(morgan(`:method :url :status :res[content-length] - :response-time ms :response`));
+app.use(morgan(':method :url :status :res[content-length] - :response-time ms :response'));
 
 //! Error handlers
 const errorHandler = (error, request, response, next) => {

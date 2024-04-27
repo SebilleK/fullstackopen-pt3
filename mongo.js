@@ -3,7 +3,7 @@ require('dotenv').config();
 
 if (process.argv.length > 5 || process.argv.length < 3) {
 	console.log(
-		`Please provide the password as an argument. The following formats are accepted: \n    node mongo.js <password> <name> <number> : Adds a new entry to the phonebook \n    node mongo.js <password> : Lists all entries in the database`,
+		'Please provide the password as an argument. The following formats are accepted: \n    node mongo.js <password> <name> <number> : Adds a new entry to the phonebook \n    node mongo.js <password> : Lists all entries in the database',
 	);
 	process.exit(1);
 } else {

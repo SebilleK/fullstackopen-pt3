@@ -20,3 +20,5 @@ npm start
 node mongo.js <password> <name> <number> : Adds a new entry to the phonebook
 node mongo.js <password> : Lists all entries in the database
 ```
+
+- ESLint is configured a bit differently than taught due to version incompatibilities.
